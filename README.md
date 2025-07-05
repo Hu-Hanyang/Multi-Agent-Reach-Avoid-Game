@@ -1,10 +1,8 @@
 # Multi-Agent-Reach-Avoid-Game
 
-Hamilton-Jacobi (HJ) reachability analysis based multi-agent reach-avoid game repo.
+**Hamilton-Jacobi (HJ) reachability analysis based multi-agent reach-avoid game repo.**
 
 This repository contains the implementation of the paper "Multi-Agent Reach-Avoid Games: Two Attackers Versus One Defender and Mixed Integer Programming (2023 CDC)". This implementation is based on the [OptimizedDP library](https://github.com/SFU-MARS/optimized_dp) developed by the MARS lab, Simon Fraser University.
-
-# Details to Reimplement
 
 ## Step 1: Set Dynamics
 
