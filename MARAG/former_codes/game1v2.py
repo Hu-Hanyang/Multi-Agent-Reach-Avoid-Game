@@ -1,5 +1,5 @@
 from odp.Plots.plotting_utilities import *
-from MARAG.utilities import *
+from MARAG.utils_sig import *
 from odp.Grid import Grid
 from MARAG.compute_opt_traj import compute_opt_traj1v0
 from odp.solver import HJSolver, computeSpatDerivArray

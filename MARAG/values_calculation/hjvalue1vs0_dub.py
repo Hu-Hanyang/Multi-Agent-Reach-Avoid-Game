@@ -11,7 +11,7 @@ from MARAG.envs.DubinCars import DubinCar1vs0
 from odp.Plots import PlotOptions
 from odp.Plots.plotting_utilities import plot_isosurface, plot_valuefunction
 from odp.solver import HJSolver
-from MARAG.plots_dub import plot_value_1vs0_dub_debug
+from MARAG.plot_dub import plot_value_1vs0_dub_debug
 
 
 """ USER INTERFACES

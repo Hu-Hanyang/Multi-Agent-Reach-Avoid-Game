@@ -2,9 +2,9 @@ import numpy as np
 
 from MARAG.envs.DubinCars import DubinCar1vs0
 from MARAG.solvers import mip_solver, extend_mip_solver
-from MARAG.utilities import *
-from MARAG.dub_controllers import hj_contoller_attackers_dub
-from MARAG.plots_dub import check_current_value_dub, plot_value_1vs0_dub, animation_dub
+from MARAG.utils_sig import *
+from MARAG.controllers_dub import hj_contoller_attackers_dub
+from MARAG.plot_dub import check_current_value_dub, plot_value_1vs0_dub, animation_dub
 
 #### Game Settings ####
 value1vs0_dub, grid1vs0_dub, value1vs1_dub, grid1vs1_dub = hj_preparations_dub()

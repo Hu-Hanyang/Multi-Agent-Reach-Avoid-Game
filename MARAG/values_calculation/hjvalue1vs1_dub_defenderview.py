@@ -9,7 +9,7 @@ from odp.Grid import Grid
 from odp.Shapes import *
 # Specify the  file that includes dynamic systems, AttackerDefender4D
 from MARAG.envs.DubinCars import DubinCar1vs1
-from MARAG.plots import plot_value_1vs1_dub
+from MARAG.plot_sig import plot_value_1vs1_dub
 # Plot options
 from odp.Plots import PlotOptions
 from odp.Plots.plotting_utilities import plot_isosurface, plot_valuefunction

@@ -2,9 +2,9 @@ import numpy as np
 
 from MARAG.envs.ReachAvoidGame import ReachAvoidGameEnv
 from MARAG.solvers import mip_solver, extend_mip_solver
-from MARAG.utilities import *
-from MARAG.sig_controllers import hj_controller_attackers_1vs0, hj_controller_defenders, extend_hj_controller_defenders, single_1vs2_controller_defender, hj_controller_1vs0
-from MARAG.plots import animation, plot_scene, plot_value_1vs1_sig, plot_value_3agents
+from MARAG.utils_sig import *
+from MARAG.controllers_sig import hj_controller_attackers_1vs0, hj_controller_defenders, extend_hj_controller_defenders, single_1vs2_controller_defender, hj_controller_1vs0
+from MARAG.plot_sig import animation, plot_scene, plot_value_1vs1_sig, plot_value_3agents
 
 
 #### Game Settings ####
@@ -54,7 +54,7 @@ for step in range(total_steps):
     # control_defenders = hj_controller_defenders(game, assignments, value1vs1, value2vs1, grid1vs1, grid2vs1)
 
     # control_attackers = np.array([0.0, 0.0])
-    control_attackers = hj_controller_1vs0(uMode="min", dMode="max", uMax=1.0, a_speed=1.0, 
+    control_attackers = hj_controller_1vs0(uMode="min", uMax=1.0, a_speed=1.0, 
                                            value1vs0=value1vs0, grid1vs0=grid1vs0, 
                                            attackers=game.attackers.state, 
                                            current_status=game.attackers_status[-1])

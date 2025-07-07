@@ -2,9 +2,9 @@ import numpy as np
 
 from MARAG.envs.ReachAvoidGame import ReachAvoidGameEnv
 from MARAG.solvers import mip_solver, extend_mip_solver
-from MARAG.utilities import *
-from MARAG.sig_controllers import hj_controller_attackers_1vs0, hj_controller_defenders
-from MARAG.plots import animation
+from MARAG.utils_sig import *
+from MARAG.controllers_sig import hj_controller_attackers_1vs0, hj_controller_defenders
+from MARAG.plot_sig import animation
 
 
 #### Game Settings ####

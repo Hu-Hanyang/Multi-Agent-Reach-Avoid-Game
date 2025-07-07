@@ -2,9 +2,9 @@ import numpy as np
 
 from MARAG.envs.AttackerDefender import AttackerDefender1vs0
 from MARAG.solvers import mip_solver, extend_mip_solver
-from MARAG.utilities import *
-from MARAG.sig_controllers import hj_controller_attackers_1vs0, hj_contoller_attackers_1vs1, single_1vs1_controller_defender, single_1vs1_controller_defender_noise
-from MARAG.plots import animation, plot_value_1vs1_sig, record_video
+from MARAG.utils_sig import *
+from MARAG.controllers_sig import hj_controller_attackers_1vs0, hj_contoller_attackers_1vs1, single_1vs1_controller_defender, single_1vs1_controller_defender_noise
+from MARAG.plot_sig import animation, plot_value_1vs1_sig, record_video
 
 #### Game Settings ####
 value1vs0, value1vs1, value2vs1, value1vs2, grid1vs0, grid1vs1, grid2vs1, grid1vs2  = hj_preparations_sig()

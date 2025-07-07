@@ -3,7 +3,7 @@
 
 import numpy as np
 import gymnasium as gym
-from MARAG.utilities import make_agents
+from MARAG.utils_sig import make_agents
 
 
 class Dynamics:

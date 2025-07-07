@@ -10,7 +10,7 @@ from MARAG.envs.AttackerDefender import AttackerDefender1vs2
 from odp.Plots import PlotOptions
 from odp.Plots.plotting_utilities import plot_isosurface, plot_valuefunction
 from odp.solver import HJSolver
-from MARAG.plots import animation, plot_scene, plot_value_1vs1_sig, plot_value_3agents
+from MARAG.plot_sig import animation, plot_scene, plot_value_1vs1_sig, plot_value_3agents
 
 
 """ USER INTERFACES

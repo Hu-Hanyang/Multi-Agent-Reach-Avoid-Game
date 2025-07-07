@@ -53,13 +53,13 @@ def spa_deriv(slice_index, value_function, grid, periodic_dims=[]):
                 )
                 right_boundary = value_function[right_periodic_boundary_index]
             else:
-                right_boundary = value_function[slice_index] + np.abs(value_function[slice_index] - value_function[prev_index]) * np.sign([value_function[slice_index]])
+                right_boundary = value_function[slice_index] + np.abs(value_function[slice_index] - value_function[prev_index]) * np.sign(value_function[slice_index])
             left_deriv = (value_function[slice_index] - value_function[prev_index]) / grid.dx[dim]
             right_deriv = (right_boundary - value_function[slice_index]) / grid.dx[dim]
         else:
             left_deriv = (value_function[slice_index] - value_function[prev_index]) / grid.dx[dim]
             right_deriv = (value_function[next_index] - value_function[slice_index]) / grid.dx[dim]
-
+        
         spa_derivatives.append(((left_deriv + right_deriv) / 2)[0])
         
     return spa_derivatives
@@ -79,7 +79,7 @@ def defender_control_2vs1(game, grid2vs1, value2vs1, jointstate_2vs1):
         opt_d1, opt_d2 (tuple): the optimal control of the defender
     """
     value2vs1s = value2vs1[..., np.newaxis] 
-    spat_deriv_vector = spa_deriv(grid2vs1.get_index(jointstate_2vs1), value2vs1s, grid2vs1)
+    spat_deriv_vector = spa_deriv(grid2vs1.get_indices(jointstate_2vs1), value2vs1s, grid2vs1)
     opt_d1, opt_d2 = game.optDistb_2vs1(spat_deriv_vector)
 
     return (opt_d1, opt_d2)
@@ -99,7 +99,7 @@ def defender_control_1vs1(game, grid1vs1, value1vs1, jointstate_1vs1):
         opt_d1, opt_d2 (tuple): the optimal control of the defender
     """
     value1vs1s = value1vs1[..., np.newaxis] 
-    spat_deriv_vector = spa_deriv(grid1vs1.get_index(jointstate_1vs1), value1vs1s, grid1vs1)
+    spat_deriv_vector = spa_deriv(grid1vs1.get_indices(jointstate_1vs1), value1vs1s, grid1vs1)
     opt_d1, opt_d2 = game.optDistb_1vs1(spat_deriv_vector)
 
     return (opt_d1, opt_d2)
@@ -119,7 +119,8 @@ def defender_control_1vs2(game, grid1vs2, value1vs2, jointstate_1vs2):
         opt_d1, opt_d2 (tuple): the optimal control of the defender
     """
     value1vs2s = value1vs2[..., np.newaxis] 
-    spat_deriv_vector = spa_deriv(grid1vs2.get_index(jointstate_1vs2), value1vs2s, grid1vs2)
+    spat_deriv_vector = spa_deriv(grid1vs2.get_indices(jointstate_1vs2), value1vs2s, grid1vs2)
+    print(f"############ spat_deriv_vector: {spat_deriv_vector}")
     opt_d1, opt_d2, opt_d3, opt_d4 = game.optDistb_1vs2(spat_deriv_vector)
 
     return (opt_d1, opt_d2, opt_d3, opt_d4)
@@ -139,7 +140,7 @@ def attacker_control_1vs0(game, grid1vs0, value1vs0, attacker, neg2pos):
     if current_value > 0:
         value1vs0 = value1vs0 - current_value
     v = value1vs0[..., neg2pos] # Minh: v = value1v0[..., neg2pos[0]]
-    spat_deriv_vector = spa_deriv(grid1vs0.get_index(attacker), v, grid1vs0)
+    spat_deriv_vector = spa_deriv(grid1vs0.get_indices(attacker), v, grid1vs0)
     opt_a1, opt_a2 = game.optCtrl_1vs0(spat_deriv_vector)
 
     return (opt_a1, opt_a2)
@@ -158,7 +159,7 @@ def attacker_control_1vs1(game, grid1vs1, value1vs1, current_state, neg2pos):
     if current_value > 0:
         value1vs1 = value1vs1 - current_value
     v = value1vs1[..., neg2pos]
-    spat_deriv_vector = spa_deriv(grid1vs1.get_index(current_state), v, grid1vs1)
+    spat_deriv_vector = spa_deriv(grid1vs1.get_indices(current_state), v, grid1vs1)
     opt_a1, opt_a2 = game.optCtrl_1vs1(spat_deriv_vector)
 
     return (opt_a1, opt_a2)
@@ -172,7 +173,7 @@ def find_sign_change1vs0(grid1vs0, value1vs0, attacker):
     value1vs0 (ndarray): including all the time slices, shape = [100, 100, len(tau)]
     attacker (ndarray, (dim,)): the current state of one attacker
     """
-    current_slices = grid1vs0.get_index(attacker)
+    current_slices = grid1vs0.get_indices(attacker)
     current_value = value1vs0[current_slices[0], current_slices[1], :]  # current value in all time slices
     neg_values = (current_value<=0).astype(int)  # turn all negative values to 1, and all positive values to 0
     checklist = neg_values - np.append(neg_values[1:], neg_values[-1])
@@ -189,7 +190,7 @@ def find_sign_change1vs1(grid1vs1, value1vs1, current_state):
     value1vs1 (ndarray): including all the time slices, shape = [45, 45, 45, 45, len(tau)]
     current_state (ndarray, (dim,)): the current state of one attacker + one defender
     """
-    current_slices = grid1vs1.get_index(current_state)
+    current_slices = grid1vs1.get_indices(current_state)
     current_value = value1vs1[current_slices[0], current_slices[1], current_slices[2], current_slices[3], :]  # current value in all time slices
     neg_values = (current_value<=0).astype(int)  # turn all negative values to 1, and all positive values to 0
     checklist = neg_values - np.append(neg_values[1:], neg_values[-1])
@@ -318,7 +319,7 @@ def single_1vs2_controller_defender(game, value1vs2, grid1vs2):
     d2x, d2y = defenders[1]
     jointstate_1vs2 = (a1x, a1y, d1x, d1y, d2x, d2y)
     opt_d1, opt_d2, opt_d3, opt_d4 = defender_control_1vs2(game, grid1vs2, value1vs2, jointstate_1vs2)
-    
+   
     control_defenders[0] = (opt_d1, opt_d2)
     control_defenders[1] = (opt_d3, opt_d4)
 
@@ -487,7 +488,7 @@ def hj_controller_1vs0(uMode, uMax, a_speed, value1vs0, grid1vs0, attackers, cur
                 if current_value > 0:
                     value1vs0 = value1vs0 - current_value
                 v = value1vs0[..., neg2pos] 
-                spat_deriv_vector = spa_deriv(grid1vs0.get_index(attackers[i]), v, grid1vs0)
+                spat_deriv_vector = spa_deriv(grid1vs0.get_indices(attackers[i]), v, grid1vs0)
                 control_attackers[i] = optCtrl_1vs0(spat_deriv_vector, uMax, uMode, a_speed)
             else:
                 control_attackers[i] = (0.0, 0.0)
@@ -632,7 +633,7 @@ def hj_controller_1vs1_defender(dMode, dMax, d_speed, value1vs1, grid1vs1, joint
         jointstate_1vs1 (a1x, a1y, d1x, d1y): the current joint state of one attacker and one defender
     """
     value1vs1s = value1vs1[..., np.newaxis] 
-    spat_deriv_vector = spa_deriv(grid1vs1.get_index(jointstate_1vs1), value1vs1s, grid1vs1)
+    spat_deriv_vector = spa_deriv(grid1vs1.get_indices(jointstate_1vs1), value1vs1s, grid1vs1)
     opt_d1, opt_d2 = optDistb_1vs1(spat_deriv_vector, dMax, dMode, d_speed)
 
     return (opt_d1, opt_d2)
@@ -651,7 +652,7 @@ def hj_controller_2vs1_defender(dMode, dMax, d_speed, value2vs1, grid2vs1, joint
         jointstate_2vs1 (a1x, a1y, a2x, a2y, d1x, d1y): the current joint state of two attackers and one defender
     """
     value1vs1s = value2vs1[..., np.newaxis] 
-    spat_deriv_vector = spa_deriv(grid2vs1.get_index(jointstate_2vs1), value1vs1s, grid2vs1)
+    spat_deriv_vector = spa_deriv(grid2vs1.get_indices(jointstate_2vs1), value1vs1s, grid2vs1)
     opt_d1, opt_d2 = optDistb_2vs1(spat_deriv_vector, dMax, dMode, d_speed)
 
     return (opt_d1, opt_d2)
@@ -670,7 +671,7 @@ def hj_controller_1vs2_defender(dMode, dMax, d_speed, value1vs2, grid1vs2, joint
         jointstate_1vs2 (a1x, a1y, d1x, d1y, d2x, d2y): the current joint state of one attacker and two defenders
     """
     value1vs2s = value1vs2[..., np.newaxis] 
-    spat_deriv_vector = spa_deriv(grid1vs2.get_index(jointstate_1vs2), value1vs2s, grid1vs2)
+    spat_deriv_vector = spa_deriv(grid1vs2.get_indices(jointstate_1vs2), value1vs2s, grid1vs2)
     opt_d1, opt_d2, opt_d3, opt_d4 = optDistb_1vs2(spat_deriv_vector, dMax, dMode, d_speed)
 
     return (opt_d1, opt_d2, opt_d3, opt_d4)

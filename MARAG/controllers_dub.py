@@ -3,7 +3,7 @@
 '''
 import numpy as np
 
-from MARAG.plots_dub import po2slice1vs0_dub, plot_value_1vs0_dub
+from MARAG.plot_dub import po2slice1vs0_dub, plot_value_1vs0_dub
 from odp.solver import HJSolver, computeSpatDerivArray
 
 

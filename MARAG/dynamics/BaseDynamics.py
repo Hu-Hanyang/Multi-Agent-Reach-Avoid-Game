@@ -6,9 +6,7 @@ Hanyang Hu, 20240517
 import numpy as np
 
 
-class BaseDynamics:
-    """Base class for "drone aviary" Gym environments."""
-    
+class BaseDynamics:    
     def __init__(self, number, initials, frequency):
         ''' Initialize the dynamics of the agents.
         Now assume all agents have the same dynamics. 

@@ -2,7 +2,7 @@ import matplotlib.pyplot as plt
 import numpy as np
 from odp.Plots.plotting_utilities import *
 from odp.Grid import Grid
-from utilities import lo2slice1v1, lo2slice2v1, lo2slice1v0
+from MARAG.utils_sig import lo2slice1v1, lo2slice2v1, lo2slice1v0
 
 # load reach-avoid value functions
 grid_size1v1 = 45
