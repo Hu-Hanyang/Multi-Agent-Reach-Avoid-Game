@@ -26,6 +26,7 @@ class BaseDynamics:
     
     
     def forward(self, state, action):
+        #TODO: state and actions should be numpy array in the shape of (M, d)
         """Update and return the next state of one agent after executing the action.
 
         Must be implemented in a subclass.

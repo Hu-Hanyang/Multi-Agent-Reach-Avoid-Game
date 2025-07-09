@@ -282,6 +282,7 @@ def judge_1vs2(attackers, defenders, current_attackers_status, value1vs2):
 
 
 def judges(attackers, defenders, current_attackers_status, value1vs1, value2vs1, value1vs2):
+    #TODO: what name is it???
     """ Check the result of 1 vs. 1, 2 vs. 1 and 1 vs. 2 games for those free attackers.
 
     Args:
