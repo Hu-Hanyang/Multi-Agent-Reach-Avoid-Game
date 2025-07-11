@@ -18,9 +18,9 @@ class Dynamics:
     
     
 class BaseEnv(gym.Env):
-    #TODO: Input is the list of dynamics?
+    #TODO: Input is the list of dynamics? or we assume all attackers share the same dynamics
+    # All defenders share the same dynamics
     def __init__(self,
-                 attackers_list: list,
                  num_attackers: int=1,
                  num_defenders: int=1,
                  attackers_dynamics=Dynamics.SIG,  

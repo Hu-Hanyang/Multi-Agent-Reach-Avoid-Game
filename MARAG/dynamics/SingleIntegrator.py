@@ -1,94 +1,58 @@
 import numpy as np
-import heterocl as hcl
-
-from MARAG.dynamics.BaseDynamics import BaseDynamics
+from typing import Tuple
+from MARAG.dynamics.BasicDynamic import BasicDynamic
  
  
-class SingleIntegrator(BaseDynamics):
-    '''2D * num single integrator agents dynamics.
+class SingleIntegrator(BasicDynamic):
+    '''2D SingleIntegrator agents dynamics.
     x_dot = v * u1
     y_dot = v * u2
     '''
-    def __init__(self, number, initials, frequency, uMin=-1, uMax=1, speed=1.0):
-        ''' Initialize the dynamics of the agents.
-        
-        Args:
-            number (int): the number of agents
-            initials (np.ndarray): the initial states of all agents
-        '''
-        super().__init__(number=number, initials=initials, frequency=frequency)
-        self.uMax = uMax
-        self.uMin = uMin
+    def __init__(self, 
+                 control_freq: float,
+                 state_lower_bound: np.ndarray,
+                 state_upper_bound: np.ndarray,
+                 action_lower_bound: np.ndarray,
+                 action_upper_bound: np.ndarray,
+                 speed=1.0):
+        super().__init__(control_freq=control_freq,
+                         state_lower_bound=state_lower_bound,
+                         state_upper_bound=state_upper_bound,
+                         action_lower_bound=action_lower_bound,
+                         action_upper_bound=action_upper_bound,
+                         )
         self.speed = speed
-        assert self.dim == number*2, "The dimension of the initial states are not correct for the SingleIntegrator."
-    
 
-    def _dynamics(self, state, action):
-        """Return the partial derivative equations of one agent.
-
-        Args:
-            state (np.ndarray, ): the state of one agent
-            action (np.ndarray, shape (2, )): the action of one agent
+    def dynamics(self, state, action) -> np.ndarray:
         """
-        dx = self.speed * action[0]
-        dy = self.speed * action[1]
-        return (dx, dy)
-    
-
-    def forward(self, state, action):
-        """Update and return the next state of one agent with the action based on the Runge Kutta method.
-        
         Args:
-            state (np.ndarray, ): the state of one agent
-            action (np.ndarray, shape (state_dim, )): the action of one agent
-
+            state (np.ndarray): Current system state, shape (M, 2).
+            action (np.ndarray): Control input for each agent, shape (M, 2).
+        Returns:
+            (np.ndarray): Derivative of the state, shape (M, 2)
         """
-        dx, dy = self._dynamics(state, action)
-        # Compute the k1 terms
-        k1_x = 1/self.frequency * dx
-        k1_y = 1/self.frequency * dy
+        clipped_action = self.check_action_bounds(action)
+        dx = self.speed * clipped_action[:, 0]
+        dy = self.speed * clipped_action[:, 1]
         
-        # Compute the k2 terms
-        k2_x = 1/self.frequency * dx
-        k2_y = 1/self.frequency * dy
-        
-        # Compute the k3 terms
-        k3_x = 1/self.frequency * dx
-        k3_y = 1/self.frequency * dy
-        
-        # Compute the k4 terms
-        k4_x = 1/self.frequency * dx
-        k4_y = 1/self.frequency * dy
-        
-        # Combine to get the final state
-        x_new = state[0] + (1/6) * (k1_x + 2 * k2_x + 2 * k3_x + k4_x)
-        y_new = state[1] + (1/6) * (k1_y + 2 * k2_y + 2 * k3_y + k4_y)
-        
-        # Check the boundary
-        x_min, x_max, y_min, y_max = -1.0, 1.0, -1.0, 1.0
-        x_new = max(min(x_new, x_max), x_min)
-        y_new = max(min(y_new, y_max), y_min)
-        
-        return x_new, y_new
+        return np.stack([dx, dy], axis=1)
 
-
-    def step(self, action):
-        """Update and return the next state of all agents after executing the action.
-        
+    def forward(self, state, action) -> np.ndarray:
+        """        
         Args:
-            action (np.ndarray, shape num_attacker x action_dim): the actions of all agents
-        """
-        for i in range(self.numbers):
-            self.state[i] = self.forward(self.state[i], action[i])
-    
-
-    def _get_state(self):
-        """Return the current states of all agents in the form of xxx.
+            state (np.ndarray): Current system state, shape (M, 2).
+            action (np.ndarray): Control input for each agent, shape (M, 2).
         
         Returns:
-            np.ndarray (shape (num_agents, state_dim)): the current states of all agents
-
+            next_state (np.ndarray): Next state for each agent, shape (M, 2).
         """
-        return self.state
-    
-    
+        k1 = self.dynamics(state, action)  # shape (M, 2)
+        k2 = self.dynamics(state + 0.5 * self.dt * k1, action)
+        k3 = self.dynamics(state + 0.5 * self.dt * k2, action)
+        k4 = self.dynamics(state + self.dt * k3, action)
+
+        next_state = state + (self.dt / 6.0) * (k1 + 2*k2 + 2*k3 + k4)
+        
+        clipped_next_state = self.check_state_bounds(next_state)
+        
+        return clipped_next_state

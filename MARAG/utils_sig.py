@@ -7,8 +7,8 @@ import time
 import numpy as np
 
 from odp.Grid import Grid
-from MARAG.dynamics.SingleIntegrator import SingleIntegrator
-from MARAG.dynamics.DubinsCar3D import DubinsCar
+from MARAG.dynamics.SingleIntegrator_old import SingleIntegrator
+from MARAG.dynamics.DubinsCar3D_old import DubinsCar
 
 
 def make_agents(physics_info, numbers, initials, freqency):

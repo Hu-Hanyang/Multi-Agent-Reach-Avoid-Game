@@ -1,6 +1,6 @@
 import numpy as np
 from enum import Enum
-from MARAG.dynamics.SingleIntegrator import SingleIntegrator
+from MARAG.dynamics.SingleIntegrator_old import SingleIntegrator
 from MARAG.envs.ReachAvoidGame import ReachAvoidGameEnv
 
 class Physics:
