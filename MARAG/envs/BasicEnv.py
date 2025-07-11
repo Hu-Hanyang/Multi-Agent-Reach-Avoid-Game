@@ -17,7 +17,7 @@ class Dynamics:
     FDUB3D = {'id': 'fdub3d', 'action_dim': 1, 'state_dim': 3, 'speed': 0.22}     # Faster 3D Dubins car dynamics with feedback
     
     
-class BaseEnv(gym.Env):
+class BasicEnv(gym.Env):
     #TODO: Input is the list of dynamics? or we assume all attackers share the same dynamics
     # All defenders share the same dynamics
     def __init__(self,
