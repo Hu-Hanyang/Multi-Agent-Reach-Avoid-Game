@@ -64,9 +64,13 @@ for step in range(int(T/t)):
         print(f"########## Game is over. #######")
         break
 
-plt = plot_value_contour(grid, ttr_value, [0, 1], {2: 0.1, 3: math.pi/2})
 
-plot_trajectory_basic(agent_traj, plt=plt, save_dir=f"{current_directory}/hj_figures/")
+# Plotting
+x_limit = [-3., 3.]
+y_limit = [-1., 4.]
+fig, ax= plot_value_contour(grid, ttr_value, [0, 1], {2: 0.1, 3: math.pi/2})
+
+plot_trajectory_scatter(agent_traj, ax=ax, save_dir=f"{current_directory}/hj_figures/", scatter_density=3, x_limit=x_limit, y_limit=y_limit)
         
     
 

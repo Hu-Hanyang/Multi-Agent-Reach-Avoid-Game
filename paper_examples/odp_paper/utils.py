@@ -113,8 +113,6 @@ def spa_deriv_ttr(indices, values, grids, periodic_dims=[]):
     return spa_derivatives
 
 
-
-
 def plot_trajectories_with_orientation(p_traj, e_traj, arrow_step=5):
     """
     Plot the heading angle with arrow
@@ -161,30 +159,27 @@ def plot_trajectories_with_orientation(p_traj, e_traj, arrow_step=5):
 
 def plot_trajectory_basic(traj, plt=None, save_dir=None):
     """
-    基本轨迹绘制：只显示位置路径
+    Plot one trajectory only
     """
-    # 转换为 numpy 数组以便索引
     traj_array = np.array(traj)
     
     if plt is None:
         plt.figure(figsize=(10, 8))
     
-    # 绘制轨迹线
+    # Plot the trajectory
     plt.plot(traj_array[:, 0], traj_array[:, 1], 'r-', linewidth=2, label='p trajectory')
-    # 绘制起点和终点
+    
+    # Plot initial and goal position
     plt.plot(traj_array[0, 0], traj_array[0, 1], 'go', markersize=8, label='p start')
     plt.plot(traj_array[-1, 0], traj_array[-1, 1], 'rs', markersize=8, label='p end')
     
-    # 绘制起点heading方向的箭头
+    # Plot the arrow of the initial position
     start_x, start_y = traj_array[0, 0], traj_array[0, 1]
-    start_theta = traj_array[0, 3]  # 起点的theta
-    
-    # 计算箭头的方向向量
-    arrow_length = 0.2  # 箭头长度（可根据轨迹尺度调整）
+    start_theta = traj_array[0, 3] 
+    # the length of the arrow
+    arrow_length = 0.2
     dx = arrow_length * np.cos(start_theta)
     dy = arrow_length * np.sin(start_theta)
-    
-    # 绘制箭头
     plt.arrow(start_x, start_y, dx, dy, 
               head_width=0.1, head_length=0.15, 
               fc='blue', ec='blue', 
@@ -201,22 +196,106 @@ def plot_trajectory_basic(traj, plt=None, save_dir=None):
     plt.show()
 
 
+def plot_trajectory_scatter(traj, ax=None, save_dir=None, scatter_density=10, x_limit=None, y_limit=None):
+    """
+    Scatter plot trajectory: Display position and direction using scatter points and arrows
+    
+    Parameters:
+    - traj: Trajectory data containing [x, y, v, theta, ...]
+    - ax: matplotlib axes object, if None then create a new figure
+    - save_dir: Save directory path, if None then don't save
+    - scatter_density: Scatter density, number of points to skip between each scatter point and arrow
+    - x_limit: X-axis range [min, max]
+    - y_limit: Y-axis range [min, max]
+    """
+    # Convert to numpy array for indexing
+    traj_array = np.array(traj)
+    
+    if ax is None:
+        fig, ax = plt.subplots(figsize=(10, 8))
+    else:
+        fig = ax.figure
+    
+    # Sample every scatter_density points
+    sampled_indices = range(0, len(traj_array), scatter_density)
+    sampled_traj = traj_array[sampled_indices]
+    
+    # Plot scatter points
+    ax.scatter(sampled_traj[:, 0], sampled_traj[:, 1], 
+               c='red', marker='o', s=30, alpha=0.7, label='Position points')
+    
+    # Plot start and end points (special markers)
+    ax.scatter(traj_array[0, 0], traj_array[0, 1], 
+               c='green', marker='o', s=100, label='Start')
+    ax.scatter(traj_array[-1, 0], traj_array[-1, 1], 
+               c='blue', marker='s', s=100, label='End')
+    
+    # Draw direction arrows for sampled points
+    arrow_length = 0.3  # Arrow length
+    
+    for i, point in enumerate(sampled_traj):
+        x, y, theta = point[0], point[1], point[3]
+        
+        # Calculate arrow direction vector
+        dx = arrow_length * np.cos(theta)
+        dy = arrow_length * np.sin(theta)
+        
+        # Draw arrow
+        ax.arrow(x, y, dx, dy, 
+                 head_width=0.08, head_length=0.12, 
+                 fc='purple', ec='purple', alpha=0.6,
+                 length_includes_head=True)
+    
+    # # Special annotation for start direction (larger and more prominent arrow)
+    # start_x, start_y = traj_array[0, 0], traj_array[0, 1]
+    # start_theta = traj_array[0, 3]
+    # start_dx = arrow_length * 1.5 * np.cos(start_theta)
+    # start_dy = arrow_length * 1.5 * np.sin(start_theta)
+    
+    # ax.arrow(start_x, start_y, start_dx, start_dy, 
+    #          head_width=0.15, head_length=0.2, 
+    #          fc='darkblue', ec='darkblue', 
+    #          label='Start Heading')
+    
+    ax.set_xlabel('X')
+    ax.set_ylabel('Y')
+    ax.set_title('Trajectory with Scatter Points and Direction Arrows')
+    ax.legend(loc='upper left')
+    ax.grid(True, alpha=0.3)
+    ax.axis('equal')
+    
+    # Set axis limits
+    if x_limit is not None:
+        ax.set_xlim(x_limit)
+    if y_limit is not None:
+        ax.set_ylim(y_limit)
+    
+    if save_dir is not None:
+        fig.savefig(f"{save_dir}/traj_scatter.png", dpi=300, bbox_inches='tight')
+        print(f"********** The figure is saved as:{save_dir}/traj_scatter.png. ***********")
+    
+    return fig, ax
+
 
 def plot_trajectories_basic(p_traj, e_traj, save_dir=None):
+    """Plot 2 trajectories
+
+    Args:
+        p_traj (_type_): _description_
+        e_traj (_type_): _description_
+        save_dir (_type_, optional): _description_. Defaults to None.
     """
-    基本轨迹绘制：只显示位置路径
-    """
-    # 转换为 numpy 数组以便索引
+    
     p_array = np.array(p_traj)
     e_array = np.array(e_traj)
     
     plt.figure(figsize=(10, 8))
     
-    # 绘制轨迹线
+    # Plot trajectories
     plt.plot(p_array[:, 0], p_array[:, 1], 'r-', linewidth=2, label='p trajectory')
     plt.plot(e_array[:, 0], e_array[:, 1], 'b-', linewidth=2, label='e trajectory')
     
-    # 绘制起点和终点
+    # Plot initial and goal positions
     plt.plot(p_array[0, 0], p_array[0, 1], 'go', markersize=8, label='p start')
     plt.plot(p_array[-1, 0], p_array[-1, 1], 'rs', markersize=8, label='p end')
     plt.plot(e_array[0, 0], e_array[0, 1], 'go', markersize=8, markerfacecolor='none', label='e start')
@@ -233,7 +312,7 @@ def plot_trajectories_basic(p_traj, e_traj, save_dir=None):
     plt.show()
 
 
-def plot_value_contour(grid, value_function, plot_dims, fixed_values=None, vmin=0, vmax=10, save_dir=None):
+def plot_value_contour(grid, value_function, plot_dims, fixed_values=None, vmin=0, vmax=10, ax=None, save_dir=None):
     """
     Plot a contour slice of a 4D value function.
     
@@ -248,10 +327,14 @@ def plot_value_contour(grid, value_function, plot_dims, fixed_values=None, vmin=
     fixed_values : dict, optional
         Dictionary specifying fixed values for non-plotted dimensions
         Example: {2: 1.0, 3: math.pi/2} for v=1.0, theta=pi/2
+    ax : matplotlib axes object, optional
+        Axes to plot on. If None, creates new figure.
+    vmin, vmax : float
+        Value range for color mapping
     
     Returns:
     --------
-    matplotlib contour plot
+    fig, ax : matplotlib figure and axes objects
     """
     # Default fixed values if not provided
     if fixed_values is None:
@@ -331,17 +414,27 @@ def plot_value_contour(grid, value_function, plot_dims, fixed_values=None, vmin=
         if dim not in plot_dims:
             dim_value = fixed_values.get(dim, coords[dim][fixed_indices.get(dim, 0)])
             title_parts.append(f"{dim_names[dim]}={dim_value:.2f}")
-            
+    
+    # Create figure and axes if not provided
+    if ax is None:
+        fig, ax = plt.subplots(figsize=(12, 8))
+    else:
+        fig = ax.figure
+    
     # Plot the contour
-    plt.figure(figsize=(10, 8))
-    contour = plt.contourf(X, Y, slice_2d_clipped.T, levels=50, cmap='viridis', vmin=vmin, vmax=vmax)
-    plt.colorbar(contour, label='Value')
-    plt.xlabel(x_label)
-    plt.ylabel(y_label)
-    plt.title(f'Value Function Contour ({", ".join(title_parts)})\nValues clipped to [{vmin}, {vmax}]')
-    plt.grid(True, alpha=0.3)
+    contour = ax.contourf(X, Y, slice_2d_clipped.T, levels=50, cmap='viridis', vmin=vmin, vmax=vmax)
+    
+    # Add colorbar
+    cbar = fig.colorbar(contour, ax=ax, label='Value')
+    
+    # Set labels and title
+    ax.set_xlabel(x_label)
+    ax.set_ylabel(y_label)
+    ax.set_title(f'Value Function Contour ({", ".join(title_parts)})\nValues clipped to [{vmin}, {vmax}]')
+    ax.grid(True, alpha=0.3)
+    
     if save_dir is not None:
-        plt.savefig(f"{save_dir}/TTR.png")
-        print(f"##### The figure is saves as: {save_dir}/TTR.png")
-    # plt.show()
-    return plt
+        fig.savefig(f"{save_dir}/TTR.png", dpi=300, bbox_inches='tight')
+        print(f"##### The figure is saved as: {save_dir}/TTR.png")
+    
+    return fig, ax
