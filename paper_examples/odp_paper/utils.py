@@ -259,7 +259,7 @@ def plot_trajectory_scatter(traj, ax=None, save_dir=None, scatter_density=10, x_
     
     ax.set_xlabel('X')
     ax.set_ylabel('Y')
-    ax.set_title('Trajectory with Scatter Points and Direction Arrows')
+    ax.set_title('DubinsCar4D with TTR-generated trajectory')
     ax.legend(loc='upper left')
     ax.grid(True, alpha=0.3)
     ax.axis('equal')
@@ -312,9 +312,12 @@ def plot_trajectories_basic(p_traj, e_traj, save_dir=None):
     plt.show()
 
 
-def plot_value_contour(grid, value_function, plot_dims, fixed_values=None, vmin=0, vmax=10, ax=None, save_dir=None):
+def plot_value_contour(grid, value_function, plot_dims, fixed_values=None, vmin=0, vmax=10, 
+                      ax=None, save_dir=None, goal_center=None, goal_radius=None, 
+                      obstacles=None, obstacle_color='red', goal_color='green',
+                      linewidth=2, linestyle='-'):
     """
-    Plot a contour slice of a 4D value function.
+    Plot a contour slice of a 4D value function with goal and obstacles (boundaries only).
     
     Parameters:
     -----------
@@ -331,6 +334,20 @@ def plot_value_contour(grid, value_function, plot_dims, fixed_values=None, vmin=
         Axes to plot on. If None, creates new figure.
     vmin, vmax : float
         Value range for color mapping
+    goal_center : tuple, optional
+        (x, y) coordinates of the goal center
+    goal_radius : float, optional
+        Radius of the goal circle
+    obstacles : list of tuples, optional
+        List of obstacle rectangles as [(x_min, x_max, y_min, y_max), ...]
+    obstacle_color : str, optional
+        Color for obstacle boundaries
+    goal_color : str, optional
+        Color for goal boundary
+    linewidth : float, optional
+        Line width for boundaries
+    linestyle : str, optional
+        Line style for boundaries
     
     Returns:
     --------
@@ -427,11 +444,32 @@ def plot_value_contour(grid, value_function, plot_dims, fixed_values=None, vmin=
     # Add colorbar
     cbar = fig.colorbar(contour, ax=ax, label='Value')
     
+    # Plot goal circle boundary if provided
+    if goal_center is not None and goal_radius is not None:
+        goal_circle = plt.Circle(goal_center, goal_radius, color=goal_color, alpha=1.0, 
+                               fill=False, linewidth=linewidth, linestyle=linestyle,
+                               label='Goal Region')
+        ax.add_patch(goal_circle)
+    
+    # Plot obstacle boundaries if provided
+    if obstacles is not None:
+        for i, (x_min, x_max, y_min, y_max) in enumerate(obstacles):
+            width = x_max - x_min
+            height = y_max - y_min
+            obstacle_rect = plt.Rectangle((x_min, y_min), width, height, 
+                                        color=obstacle_color, alpha=1.0, 
+                                        fill=False, linewidth=linewidth, linestyle=linestyle,
+                                        label='Obstacle' if i == 0 else "")
+            ax.add_patch(obstacle_rect)
+    
     # Set labels and title
     ax.set_xlabel(x_label)
     ax.set_ylabel(y_label)
     ax.set_title(f'Value Function Contour ({", ".join(title_parts)})\nValues clipped to [{vmin}, {vmax}]')
     ax.grid(True, alpha=0.3)
+    
+    # Set aspect ratio to equal and adjust limits
+    ax.set_aspect('equal')
     
     if save_dir is not None:
         fig.savefig(f"{save_dir}/TTR.png", dpi=300, bbox_inches='tight')
