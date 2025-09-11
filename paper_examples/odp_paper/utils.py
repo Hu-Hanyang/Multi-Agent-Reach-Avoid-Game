@@ -315,9 +315,10 @@ def plot_trajectories_basic(p_traj, e_traj, save_dir=None):
 def plot_value_contour(grid, value_function, plot_dims, fixed_values=None, vmin=0, vmax=10, 
                       ax=None, save_dir=None, goal_center=None, goal_radius=None, 
                       obstacles=None, obstacle_color='red', goal_color='green',
-                      linewidth=2, linestyle='-'):
+                      linewidth=2, linestyle='-', contour_linewidth=2, contour_linestyle='-',
+                      show_contour_labels=True, contour_levels=20):
     """
-    Plot a contour slice of a 4D value function with goal and obstacles (boundaries only).
+    Plot contour lines of a 4D value function with goal and obstacles (boundaries only).
     
     Parameters:
     -----------
@@ -333,7 +334,7 @@ def plot_value_contour(grid, value_function, plot_dims, fixed_values=None, vmin=
     ax : matplotlib axes object, optional
         Axes to plot on. If None, creates new figure.
     vmin, vmax : float
-        Value range for color mapping
+        Value range for contour levels
     goal_center : tuple, optional
         (x, y) coordinates of the goal center
     goal_radius : float, optional
@@ -345,9 +346,17 @@ def plot_value_contour(grid, value_function, plot_dims, fixed_values=None, vmin=
     goal_color : str, optional
         Color for goal boundary
     linewidth : float, optional
-        Line width for boundaries
+        Line width for goal and obstacle boundaries
     linestyle : str, optional
-        Line style for boundaries
+        Line style for goal and obstacle boundaries
+    contour_linewidth : float, optional
+        Line width for contour lines
+    contour_linestyle : str, optional
+        Line style for contour lines
+    show_contour_labels : bool, optional
+        Whether to show contour value labels
+    contour_levels : int or array-like, optional
+        Number of contour levels or specific level values
     
     Returns:
     --------
@@ -434,15 +443,19 @@ def plot_value_contour(grid, value_function, plot_dims, fixed_values=None, vmin=
     
     # Create figure and axes if not provided
     if ax is None:
-        fig, ax = plt.subplots(figsize=(12, 8))
+        fig, ax = plt.subplots(figsize=(7, 6))
     else:
         fig = ax.figure
     
-    # Plot the contour
-    contour = ax.contourf(X, Y, slice_2d_clipped.T, levels=50, cmap='viridis', vmin=vmin, vmax=vmax)
+    # Plot contour lines instead of filled contours
+    contour = ax.contour(X, Y, slice_2d_clipped.T, levels=contour_levels, 
+                        cmap="rainbow", linewidths=contour_linewidth, 
+                        linestyles=contour_linestyle, vmin=vmin, vmax=vmax,
+                        zorder=1)
     
-    # Add colorbar
-    cbar = fig.colorbar(contour, ax=ax, label='Value')
+    # Add contour value labels if requested
+    if show_contour_labels:
+        ax.clabel(contour, inline=True, fontsize=8, fmt='%.1f')
     
     # Plot goal circle boundary if provided
     if goal_center is not None and goal_radius is not None:
@@ -465,14 +478,14 @@ def plot_value_contour(grid, value_function, plot_dims, fixed_values=None, vmin=
     # Set labels and title
     ax.set_xlabel(x_label)
     ax.set_ylabel(y_label)
-    ax.set_title(f'Value Function Contour ({", ".join(title_parts)})\nValues clipped to [{vmin}, {vmax}]')
+    ax.set_title(f'Value Function Contour Lines ({", ".join(title_parts)})\nValues clipped to [{vmin}, {vmax}]')
     ax.grid(True, alpha=0.3)
     
     # Set aspect ratio to equal and adjust limits
     ax.set_aspect('equal')
     
     if save_dir is not None:
-        fig.savefig(f"{save_dir}/TTR.png", dpi=300, bbox_inches='tight')
-        print(f"##### The figure is saved as: {save_dir}/TTR.png")
+        fig.savefig(f"{save_dir}/TTR_contour_lines.png", dpi=300, bbox_inches='tight')
+        print(f"##### The figure is saved as: {save_dir}/TTR_contour_lines.png")
     
     return fig, ax
