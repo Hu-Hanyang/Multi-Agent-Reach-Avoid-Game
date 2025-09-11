@@ -227,8 +227,8 @@ def plot_trajectory_scatter(traj, ax=None, save_dir=None, scatter_density=10, x_
     # Plot start and end points (special markers)
     ax.scatter(traj_array[0, 0], traj_array[0, 1], 
                c='green', marker='o', s=100, label='Start')
-    ax.scatter(traj_array[-1, 0], traj_array[-1, 1], 
-               c='blue', marker='s', s=100, label='End')
+    # ax.scatter(traj_array[-1, 0], traj_array[-1, 1], 
+    #            c='blue', marker='s', s=100, label='End')
     
     # Draw direction arrows for sampled points
     arrow_length = 0.3  # Arrow length
@@ -315,7 +315,7 @@ def plot_trajectories_basic(p_traj, e_traj, save_dir=None):
 def plot_value_contour(grid, value_function, plot_dims, fixed_values=None, vmin=0, vmax=10, 
                       ax=None, save_dir=None, goal_center=None, goal_radius=None, 
                       obstacles=None, obstacle_color='red', goal_color='green',
-                      linewidth=2, linestyle='-', contour_linewidth=2, contour_linestyle='-',
+                      linewidth=3.5, linestyle='-', contour_linewidth=2, contour_linestyle='-',
                       show_contour_labels=True, contour_levels=20):
     """
     Plot contour lines of a 4D value function with goal and obstacles (boundaries only).
@@ -449,7 +449,7 @@ def plot_value_contour(grid, value_function, plot_dims, fixed_values=None, vmin=
     
     # Plot contour lines instead of filled contours
     contour = ax.contour(X, Y, slice_2d_clipped.T, levels=contour_levels, 
-                        cmap="rainbow", linewidths=contour_linewidth, 
+                        cmap="cividis", linewidths=contour_linewidth, 
                         linestyles=contour_linestyle, vmin=vmin, vmax=vmax,
                         zorder=1)
     
