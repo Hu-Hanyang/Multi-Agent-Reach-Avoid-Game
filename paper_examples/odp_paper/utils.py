@@ -17,14 +17,18 @@ def compute_pursuer_control(hjvalue, rel_dyn, grid, rel_state, tau):
     """
     hjvalue (np.array): the hj value function with all time slices
     """
-    neg2pos, pos2neg = find_sign_change(grid, hjvalue, rel_state, tau)
+    neg2pos, pos2neg, current_value = find_sign_change(grid, hjvalue, rel_state, tau)
     if len(neg2pos):
-        current_value = grid.get_value(hjvalue[..., 0], rel_state)
-        if current_value > 0:
-            hjvalue = hjvalue - current_value
-        value = hjvalue[..., neg2pos]
+        # current_value = grid.get_value(hjvalue[..., 0], rel_state)
+        # if current_value > 0:
+        #     hjvalue = hjvalue - current_value
+        value = hjvalue[..., neg2pos[0]]
         spat_deriv = spa_deriv(grid.get_index(rel_state), value, grid, [2])
-        control = rel_dyn.optDistb_inPython(rel_state, spat_deriv)
+        print(f"neg2pos is {neg2pos} current_value is {current_value[neg2pos[0]]}")
+        # control = rel_dyn.optDistb_inPython(rel_state, spat_deriv)
+        control = rel_dyn.wMax
+        if spat_deriv[2] > 0: # pursuer minimizes - opposite sign 
+            control = -rel_dyn.wMax
     else:
         control = (0.0)
     

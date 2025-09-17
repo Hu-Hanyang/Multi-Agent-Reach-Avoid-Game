@@ -15,20 +15,20 @@ from odp.solver import HJSolver, computeSpatDerivArray
 import math
 
 # Define grid
-grid = Grid(np.array([-4.0, -4.0, -math.pi]), np.array([4.0, 4.0, math.pi]), 3, np.array([40, 40, 40]), [2])
+grid = Grid(np.array([-4.0, -4.0, -math.pi]), np.array([4.0, 4.0, math.pi]), 3, np.array([60, 60, 40]), [2])
 
 # Implicit function for the initial value function
-Initial_value_f = CylinderShape(grid, [2], np.zeros(2), 0.2)
+Initial_value_f = CylinderShape(grid, [2], np.zeros(2), 1.)
 
 # Look-back length and time step of computation
 lookback_length = 4.
-t_step = 0.05
+t_step = 0.1
 
 small_number = 1e-5
 tau = np.arange(start=0, stop=lookback_length + small_number, step=t_step)
 
 # uMode maximizing means avoiding capture, dMode minimizing means capturing
-my_car = DubinsCapture(uMode="max", dMode="min")
+my_car = DubinsCapture(uMode="max", dMode="min", wMax=1.0, dMax=1.0, speed=1.0)
 
 # Specify how to plot the isosurface of the value function ( for higher-than-3-dimension arrays, which slices, indices
 # we should plot if we plot at all )
@@ -50,7 +50,7 @@ result = HJSolver(dynamics_obj=my_car,
 
 np.save(f"{current_directory}/hj_values/pursuit_evasion3d_{saveAllTimeSteps}AllTimeSteps_{lookback_length}.npy", result)
 print(f"********** HJ value function is saved at {current_directory}/hj_values/pursuit_evasion3d_{saveAllTimeSteps}AllTimeSteps_{lookback_length}.npy. **********")
-# plot_isosurface(g, result, po2)
+plot_isosurface(grid, result, po2)
 
 # if saveAllTimeSteps:
 #     last_time_step_result = result[..., 0]
