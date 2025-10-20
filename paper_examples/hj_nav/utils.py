@@ -312,153 +312,36 @@ def plot_trajectories_basic(p_traj, e_traj, save_dir=None):
     plt.show()
 
 
-def plot_value_contour(grid, value_function, plot_dims, fixed_values=None, vmin=0, vmax=10, 
-                      ax=None, save_dir=None, goal_center=None, goal_radius=None, 
-                      obstacles=None, obstacle_color='red', goal_color='green',
-                      linewidth=3.5, linestyle='-', contour_linewidth=2, contour_linestyle='-',
-                      contour_label_fontsize=8, show_contour_labels=True, show_contour_values=True, 
-                      contour_levels=20, single_contour_value=None,
-                      contour_colors=None, fill_color=None, alpha=0.3):
+def value_to_slice(value, value_range, resolution):
     """
-    Plot contour lines of a 4D value function with customizable colors.
+    Convert a continuous value to a discrete slice number.
+    
+    Args:
+        value: The continuous value to convert
+        value_range: Tuple of (min_value, max_value) defining the range
+        resolution: Number of slices/segments to divide the range into
+    
+    Returns:
+        int: The slice number (1-indexed) that the value falls into
     """
-
-    # 如果指定了单个等高线值，覆盖contour_levels
-    if single_contour_value is not None:
-        contour_levels = [single_contour_value]
+    min_val, max_val = value_range
     
-    # Default fixed values if not provided
-    if fixed_values is None:
-        fixed_values = {2: 0.5, 3: np.math.pi/4}
+    # Handle edge cases
+    if value < min_val:
+        return 1
+    if value > max_val:
+        return resolution
     
-    # Get grid information
-    min_bounds = grid.min
-    max_bounds = grid.max
-    resolutions = grid.pts_each_dim
+    # Calculate the slice width
+    range_width = max_val - min_val
+    slice_width = range_width / resolution
     
-    coords = [np.linspace(min_bounds[i], max_bounds[i], resolutions[i]) for i in range(4)]
+    # Calculate which slice the value falls into
+    # Using 1-indexed slices (slice 1, slice 2, ..., slice resolution)
+    slice_num = int((value - min_val) / slice_width) + 1
     
-    fixed_indices = {dim: np.argmin(np.abs(coords[dim] - value)) for dim, value in fixed_values.items()}
+    # Handle the edge case where value equals max_val
+    if slice_num > resolution:
+        slice_num = resolution
     
-    slice_indices = [slice(None)] * 4
-    for dim, idx in fixed_indices.items():
-        slice_indices[dim] = idx
-    slice_indices = tuple(slice_indices)
-    
-    # ✅ 保留原始值和裁剪后的值
-    slice_2d = value_function[slice_indices]
-    slice_2d_raw = slice_2d
-    slice_2d_clipped = np.clip(slice_2d, vmin, vmax)
-    
-    if plot_dims != [0, 1]:
-        transpose_order = list(range(4))
-        transpose_order[plot_dims[0]], transpose_order[0] = 0, plot_dims[0]
-        transpose_order[plot_dims[1]], transpose_order[1] = 1, plot_dims[1]
-        
-        value_function_transposed = np.transpose(value_function, transpose_order)
-        coords_transposed = [coords[i] for i in transpose_order]
-        
-        slice_indices_transposed = [slice(None)] * 4
-        for i in range(4):
-            if i not in [0, 1]:
-                orig_dim = transpose_order.index(i)
-                if orig_dim in fixed_indices:
-                    slice_indices_transposed[i] = fixed_indices[orig_dim]
-        
-        slice_2d = value_function_transposed[tuple(slice_indices_transposed)]
-        slice_2d_raw = slice_2d
-        slice_2d_clipped = np.clip(slice_2d, vmin, vmax)
-        x_coords, y_coords = coords_transposed[0], coords_transposed[1]
-    else:
-        x_coords, y_coords = coords[0], coords[1]
-    
-    X, Y = np.meshgrid(x_coords, y_coords)
-    
-    dim_names = ['x', 'y', 'v', 'θ']
-    x_label, y_label = dim_names[plot_dims[0]], dim_names[plot_dims[1]]
-    
-    title_parts = []
-    for dim in range(4):
-        if dim not in plot_dims:
-            dim_value = fixed_values.get(dim, coords[dim][fixed_indices.get(dim, 0)])
-            title_parts.append(f"{dim_names[dim]}={dim_value:.2f}")
-    
-    if ax is None:
-        fig, ax = plt.subplots(figsize=(7, 6))
-    else:
-        fig = ax.figure
-    
-    # Handle contour colors
-    if contour_colors is None:
-        if show_contour_labels:
-            # ✅ 画线用裁剪后的数据
-            contour = ax.contour(X, Y, slice_2d_clipped.T, levels=contour_levels, 
-                                cmap="cividis", linewidths=contour_linewidth, 
-                                linestyles=contour_linestyle, vmin=vmin, vmax=vmax,
-                                zorder=1)
-        else:
-            # ✅ 填充用原始数据
-            contour = ax.contourf(X, Y, slice_2d_raw.T, levels=contour_levels, 
-                                 colors=fill_color if len(contour_levels) == 2 else None,
-                                 cmap=None if len(contour_levels) == 2 else "cividis",
-                                 vmin=vmin, vmax=vmax, 
-                                 zorder=1, alpha=alpha, extend='both')
-    else:
-        if show_contour_labels:
-            if isinstance(contour_colors, str):
-                colors = [contour_colors] * len(contour_levels)
-            else:
-                colors = contour_colors
-                
-            # ✅ 画线用裁剪后的数据
-            contour = ax.contour(X, Y, slice_2d_clipped.T, levels=contour_levels, 
-                                colors=colors, linewidths=contour_linewidth, 
-                                linestyles=contour_linestyle, vmin=vmin, vmax=vmax,
-                                zorder=1)
-        else:
-            if fill_color is None:
-                fill_color = 'lightgray'
-            # ✅ 填充用原始数据
-            contour = ax.contourf(X, Y, slice_2d_raw.T, levels=contour_levels, 
-                                 colors=[fill_color] if len(contour_levels) == 2 else fill_color,
-                                 vmin=vmin, vmax=vmax, 
-                                 zorder=1, alpha=alpha, extend='both')
-    
-    if show_contour_labels and show_contour_values:
-        ax.clabel(contour, inline=True, fontsize=contour_label_fontsize, fmt='%.1f')
-    
-    if goal_center is not None and goal_radius is not None:
-        goal_circle = plt.Circle(goal_center, goal_radius, color=goal_color, alpha=1.0, 
-                               fill=False, linewidth=linewidth, linestyle=linestyle,
-                               label='Goal Region')
-        ax.add_patch(goal_circle)
-    
-    if obstacles is not None:
-        for i, (x_min, x_max, y_min, y_max) in enumerate(obstacles):
-            width, height = x_max - x_min, y_max - y_min
-            obstacle_rect = plt.Rectangle((x_min, y_min), width, height, 
-                                        color=obstacle_color, alpha=1.0, 
-                                        fill=False, linewidth=linewidth, linestyle=linestyle,
-                                        label='Obstacle' if i == 0 else "")
-            ax.add_patch(obstacle_rect)
-    
-    ax.set_xlabel(x_label)
-    ax.set_ylabel(y_label)
-    
-    if show_contour_labels:
-        plot_type = "Contour Lines with Values" if show_contour_values else "Contour Lines"
-    else:
-        plot_type = "Filled Contours"
-    
-    ax.set_title(f'Value Function - {plot_type} ({", ".join(title_parts)})\nValues clipped to [{vmin}, {vmax}]')
-    ax.set_aspect('equal')
-    
-    if goal_center is not None or obstacles is not None:
-        ax.legend(loc='best')
-    
-    if save_dir is not None:
-        filename_suffix = "contour_lines" if show_contour_labels else "filled_contour"
-        fig.savefig(f"{save_dir}/hj_value_{filename_suffix}.png", dpi=300, bbox_inches='tight')
-        print(f"##### The figure is saved as: {save_dir}/hj_value_{filename_suffix}.png")
-    
-    return fig, ax
+    return slice_num

@@ -39,7 +39,7 @@ def create_4d_distance_heuristic_vectorized(grid, goal_center, goal_radius):
     distances = np.maximum(distances, 0.0)
     
     # 计算启发式值
-    heuristic_2d = distances / 0.8
+    heuristic_2d = distances / 1.0
     
     # 使用广播机制扩展到4D
     value_4d = heuristic_2d[:, :, np.newaxis, np.newaxis] * np.ones((1, 1, len(v_coords), len(theta_coords)))
