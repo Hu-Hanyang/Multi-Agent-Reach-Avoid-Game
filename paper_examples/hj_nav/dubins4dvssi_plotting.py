@@ -84,6 +84,7 @@ grid = Grid(minBounds=brt_grid_info[dyn]["minBounds"],
 current_file_path = os.path.abspath(__file__)
 current_directory = os.path.dirname(current_file_path)
 
+# Load existing HJ value function in npy file
 hj_value_path = f""
 hj_value = np.load(hj_value_path)
 

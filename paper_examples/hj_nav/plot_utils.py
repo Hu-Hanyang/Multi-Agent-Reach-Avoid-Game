@@ -263,6 +263,4 @@ def visualize_human_robot(grid,
     ax.set_ylabel(dim_names[plot_dims[1]])
     ax.set_aspect("equal")
     
-    
-    
     return fig, ax
