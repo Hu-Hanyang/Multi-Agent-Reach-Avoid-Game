@@ -345,3 +345,29 @@ def value_to_slice(value, value_range, resolution):
         slice_num = resolution
     
     return slice_num
+
+def compute_relative_state(human_position, robot_state):
+    robot_state = np.atleast_2d(robot_state)
+    human_position = np.atleast_2d(human_position)
+    
+    robot_xy = robot_state[:, :2]  # shape: (N, 2)
+    robot_theta = robot_state[:, -1] # np.deg2rad(robot_state[:, -1])  # shape: (N,) THETA index
+    M = human_position.shape[0]
+
+    # Reshape for broadcasting: (N,2) - (M,2) -> (N,M,2), and then reshape to (NxM,2)
+    translated = (
+        robot_xy[:, np.newaxis, :] - human_position[np.newaxis, :, :]
+    ).reshape(-1, 2)
+    robot_theta_tiled = np.repeat(robot_theta, M).reshape(-1, 1)  # shape:(NxM, 1)
+
+    if robot_state.shape[1] == 4:  # Dubins4DvsSI
+        robot_v_tiled = np.repeat(robot_state[:, 2], M).reshape(
+            -1, 1
+        )  # shape: (NxM, 1)
+        transformed = np.hstack(
+            [translated, robot_v_tiled, robot_theta_tiled]
+        )  # shape: (NxM, 3)
+    else:  # Dubins3DvsSI
+        transformed = np.hstack([translated, robot_theta_tiled])
+
+    return transformed

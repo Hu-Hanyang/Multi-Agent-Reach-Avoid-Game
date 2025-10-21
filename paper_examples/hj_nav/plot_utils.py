@@ -181,8 +181,6 @@ def visualize_human_robot(grid,
             fixed_values = None
             
         x_coords, y_coords = coords[0], coords[1]
-        slice_2d = value_function
-        title_parts = ["2D Value Function"]
         
     # Handle 4D case  
     else:
@@ -194,7 +192,6 @@ def visualize_human_robot(grid,
         slice_indices = [slice(None)] * 4
         for dim, idx in fixed_indices.items():
             slice_indices[dim] = idx
-        
         slice_2d = value_function[tuple(slice_indices)]
         
         if plot_dims != [0, 1]:
@@ -219,7 +216,6 @@ def visualize_human_robot(grid,
     
     # Add human translation to convert from relative to global coordinates
     if human_position is not None:
-        # 使用您的简单方法：直接对坐标轴进行平移
         x_plot = human_position[0] + x_coords
         y_plot = human_position[1] + y_coords
     else:
@@ -236,9 +232,11 @@ def visualize_human_robot(grid,
     print(f"x_plot shape: {x_plot.shape}, y_plot shape: {y_plot.shape}")
     print(f"slice_2d min: {min_val}, max: {max_val}")
     print(f"threshold: {threshold}")
+    print(f"pruning threshold: {threshold**2}")
     
-    contour_spacing = 0.1
-    levels = np.arange(min_val, max_val + contour_spacing, contour_spacing)
+    
+    contour_spacing = 0.2
+    levels = np.arange(min_val, min(max_val + contour_spacing, 2.0), contour_spacing)
     ax.grid(True)
     # Plot contour lines in gray
     contours = ax.contour(
@@ -249,6 +247,12 @@ def visualize_human_robot(grid,
     # Plot threshold line in red
     contour_threshold = ax.contour(x_plot, y_plot, slice_2d.T, levels=[threshold**2], colors="red", linewidths=1.0)
     ax.clabel(contour_threshold, inline=True, fontsize=8, fmt=f"%.2f")
+    
+    contour_min = ax.contour(x_plot, y_plot, slice_2d.T, levels=[min_val], colors="yellow", linewidths=1.0)
+    ax.clabel(contour_min, inline=True, fontsize=8, fmt=f"%.2f")
+    
+    contour_max = ax.contour(x_plot, y_plot, slice_2d.T, levels=[max_val], colors="blue", linewidths=1.0)
+    ax.clabel(contour_max, inline=True, fontsize=8, fmt=f"%.2f")
 
     # Plot human position as red 'x' if provided
     if human_position is not None:
