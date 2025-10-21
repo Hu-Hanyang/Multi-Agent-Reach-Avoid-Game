@@ -60,15 +60,17 @@ brt_grid_info = {
 
 # Necessary conditions
 dyn = "Dubins4D"
-capture_radius = 0.35
+capture_radius = 0.0
 horizon = 2.0
 v_plot = 0.5
 theta_plot = np.pi/2.
 v_slice = value_to_slice(v_plot, SPEED_BOUND, NUM_SPEED)
 theta_slice = value_to_slice(theta_plot, THETA_RANGE, NUM_THETA)
 save_all_time = False
-threshold = 0.0
-if capture_radius != 0.0:
+threshold = 0.35
+if capture_radius == 0.0:
+    threshold = 0.35
+else:
     threshold = capture_radius
 
 # Define Grid and Dynamics
@@ -136,12 +138,23 @@ else:
     print(f" ########## The HJ value function is saved as {hj_value_name}. ##########")
 
 
-fig, ax = plot_value_contour(grid=grid,
-                             value_function=hj_value,
-                             plot_dims=[0, 1],
-                             fixed_values={2: v_plot, 3: theta_plot},
-                             vmin=0.0,
-                             vmax=10.0,)
-plt.show()
+if not save_all_time:
+
+    human_position = np.array([5.0, 7.0])
+    robot_state = np.array([5.0, 5.0, v_plot, theta_plot])
+
+    fig, ax = visualize_human_robot(grid=grid,
+                                    value_function=hj_value,
+                                    plot_dims=[0, 1,],
+                                    fixed_values={2: v_plot, 3: theta_plot},
+                                    human_position=human_position,
+                                    robot_state=robot_state,
+                                    threshold=threshold,
+                                    fig=None,
+                                    ax=None)
+
+    fig_name = f"{current_directory}/hj_plots/dubins4dvssi_horizon{horizon}_radius{capture_radius}_threshold{threshold}_v{v_plot}_theta{theta_plot:.02f}_saveAllTime{save_all_time}.png"
+    fig.savefig(fig_name)
+    print(f"********** The figure is saved as: {fig_name}. *********")
 
 visualize_plots(hj_value, grid, po)
