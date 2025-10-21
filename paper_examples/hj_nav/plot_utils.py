@@ -239,7 +239,7 @@ def visualize_human_robot(grid,
     
     contour_spacing = 0.1
     levels = np.arange(min_val, max_val + contour_spacing, contour_spacing)
-    
+    ax.grid(True)
     # Plot contour lines in gray
     contours = ax.contour(
         x_plot, y_plot, slice_2d.T, levels=levels, cmap="gray", linewidths=0.5
@@ -254,8 +254,15 @@ def visualize_human_robot(grid,
     if human_position is not None:
         ax.scatter(human_position[0], human_position[1], marker='x', c='red', s=100, linewidths=2)
     
+    # Plot robot 
+    if robot_state is not None:
+        ax.quiver(robot_state[0], robot_state[1], np.cos(robot_state[3]), np.sin(robot_state[3]), color='green')
+    
     # Set labels and title
     ax.set_xlabel(dim_names[plot_dims[0]])
     ax.set_ylabel(dim_names[plot_dims[1]])
+    ax.set_aspect("equal")
+    
+    
     
     return fig, ax
